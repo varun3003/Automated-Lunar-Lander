@@ -1,0 +1,65 @@
+{
+    "LunarLander": {
+        "checkpoints": [
+            {
+                "steps": 999949,
+                "file_path": "results\\verticalTest11\\LunarLander\\LunarLander-999949.onnx",
+                "reward": 863.3874983787537,
+                "creation_time": 1708699916.096636,
+                "auxillary_file_paths": [
+                    "results\\verticalTest11\\LunarLander\\LunarLander-999949.pt"
+                ]
+            },
+            {
+                "steps": 1499980,
+                "file_path": "results\\verticalTest11\\LunarLander\\LunarLander-1499980.onnx",
+                "reward": 1295.2000060081482,
+                "creation_time": 1708700600.0274048,
+                "auxillary_file_paths": [
+                    "results\\verticalTest11\\LunarLander\\LunarLander-1499980.pt"
+                ]
+            },
+            {
+                "steps": 1999956,
+                "file_path": "results\\verticalTest11\\LunarLander\\LunarLander-1999956.onnx",
+                "reward": 1472.7555550999111,
+                "creation_time": 1708701330.0720901,
+                "auxillary_file_paths": [
+                    "results\\verticalTest11\\LunarLander\\LunarLander-1999956.pt"
+                ]
+            },
+            {
+                "steps": 2499994,
+                "file_path": "results\\verticalTest11\\LunarLander\\LunarLander-2499994.onnx",
+                "reward": 1532.9428552900042,
+                "creation_time": 1708702071.5608473,
+                "auxillary_file_paths": [
+                    "results\\verticalTest11\\LunarLander\\LunarLander-2499994.pt"
+                ]
+            },
+            {
+                "steps": 2614799,
+                "file_path": "results\\verticalTest11\\LunarLander\\LunarLander-2614799.onnx",
+                "reward": 1483.8285724094935,
+                "creation_time": 1708702248.2217956,
+                "auxillary_file_paths": [
+                    "results\\verticalTest11\\LunarLander\\LunarLander-2614799.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 2614799,
+            "file_path": "results\\verticalTest11\\LunarLander.onnx",
+            "reward": 1483.8285724094935,
+            "creation_time": 1708702248.2217956,
+            "auxillary_file_paths": [
+                "results\\verticalTest11\\LunarLander\\LunarLander-2614799.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "0.30.0",
+        "torch_version": "2.0.1+cu117"
+    }
+}

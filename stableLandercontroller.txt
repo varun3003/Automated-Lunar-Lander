@@ -1,0 +1,145 @@
+using System.Collections;
+using System.Collections.Generic;
+using System.Transactions;
+using Unity.Burst.CompilerServices;
+using UnityEngine;
+using UnityEngine.iOS;
+using UnityEngine.PlayerLoop;
+
+public class LanderController : MonoBehaviour {
+
+    private Rigidbody landerRigidbody;
+    private AgentController agentController;
+    private Transform thruster;
+    [SerializeField] private Material winMaterial;
+    [SerializeField] private Material loseMaterial;
+    [SerializeField] private MeshRenderer landingSiteRenderer;
+
+    private bool thrusterOn;
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        landerRigidbody = GetComponent<Rigidbody>();
+        agentController = GetComponent<AgentController>();
+        thrusterOn = false;
+    }
+
+    // Update is called once per frame
+    void FixedUpdate() {   
+        Vector3 position = GetPosition();
+        Vector3 velocity = GetVelocity();
+        Vector3 rotation = GetRotation();
+        Vector3 angularVelocity = GetAngularVelocity();
+
+        if(position.y > 100) {
+            agentController.EndEpisode(-1f);
+            landingSiteRenderer.material = loseMaterial;
+            Debug.Log("Escaped");
+        }
+
+        if(velocity.y > 0) {
+            agentController.AddReward(-0.8f);
+        }
+        else if(velocity.y > -4) {
+            agentController.AddReward(0.8f);
+        }
+        else {
+            agentController.AddReward(-0.8f);
+        }
+
+        if (landerRigidbody.IsSleeping()) {
+            if (Mathf.Abs(rotation.x) < 15f && Mathf.Abs(rotation.z) < 15f){
+                agentController.EndEpisode(1f);
+                landingSiteRenderer.material = winMaterial;
+                Debug.Log("Success");
+            }
+            else {
+                agentController.EndEpisode(0f);
+                landingSiteRenderer.material = loseMaterial;
+                Debug.Log("Tipped over");
+            }
+        }
+        //Debug.Log("Position X: " + position.x + " Y : " + position.y + " Z : " + position.z +
+        //    "\nVelocity X: " + velocity.x + " Y : " + velocity.y + " Z : " + velocity.z +
+        //    "\nRotation X: " + rotation.x + " Y : " + rotation.y + " Z : " + rotation.z +
+        //    "\nAngular Velocity X: " + angularVelocity.x + " Y : " + angularVelocity.y + " Z : " + angularVelocity.z);
+        if(thrusterOn && position.y > 1) {
+            //Debug.Log("Apply Thrust");
+            landerRigidbody.AddRelativeForce(45000 * Vector3.up);
+        }
+    }
+
+    public void ResetPosition() {
+        transform.localPosition = new Vector3(Random.Range(-40f,40f), Random.Range(30f,50f), Random.Range(-40f, 40f));
+        transform.localRotation = new Quaternion(0,0,0,0);
+        landerRigidbody.velocity = new Vector3(0, Random.Range(-5f,0f), 0);
+        landerRigidbody.angularVelocity = new Vector3(0,0,0);
+    }
+
+    private float GetAltitude() {
+        if (Physics.Raycast(transform.localPosition + new Vector3(0, 1, 0), Vector3.down, out RaycastHit hit, Mathf.Infinity)) {
+            return hit.distance;
+        }
+        else {
+            return -1;     
+        }
+    }
+    public Vector3 GetPosition() {
+        Vector3 position = landerRigidbody.position;
+        position.y = GetAltitude();
+        return position;
+    }
+
+    public Vector3 GetVelocity() {
+        return landerRigidbody.velocity;
+    }
+
+    public Vector3 GetRotation() {
+        Vector3 rotation = new Vector3(0,0,0);
+
+        if (landerRigidbody.rotation.eulerAngles.x <= 180f) {
+            rotation.x = landerRigidbody.rotation.eulerAngles.x;
+        }
+        else {
+            rotation.x = landerRigidbody.rotation.eulerAngles.x - 360f;
+        }
+
+        if (landerRigidbody.rotation.eulerAngles.y <= 180f) {
+            rotation.y = landerRigidbody.rotation.eulerAngles.y;
+        }
+        else {
+            rotation.y = landerRigidbody.rotation.eulerAngles.y - 360f;
+        }
+
+        if (landerRigidbody.rotation.eulerAngles.z <= 180f) {
+            rotation.z = landerRigidbody.rotation.eulerAngles.z;
+        }
+        else {
+            rotation.z = landerRigidbody.rotation.eulerAngles.z - 360f;
+        }
+
+        return rotation;
+    }
+
+    public Vector3 GetAngularVelocity() {
+        return landerRigidbody.angularVelocity;
+    }
+
+    public void SetThrusterState(int state) {
+        if(state == 0) {
+            thrusterOn = false;
+        }
+        else if(state == 1) {
+            thrusterOn = true;
+        }
+    }
+
+    void OnCollisionEnter(Collision collision) {
+        if (collision.relativeVelocity.y > 5) {
+            agentController.EndEpisode(0f);
+            landingSiteRenderer.material = loseMaterial;
+            Debug.Log("Crashed");
+        }
+    }
+}
