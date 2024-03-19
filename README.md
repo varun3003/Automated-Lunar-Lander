@@ -28,11 +28,11 @@
   pip install protobuf==3.20.3
   pip install packaging
   ```
-  - GPU (replace torch version with the correct cuda version installed on your pc, refer the url in the command to check availability)
+  - GPU (replace torch version cuxxx with the correct cuda version installed on your PC (eg.cu117), refer the url in the command to check availability)
   ```
   python -m pip install --upgrade pip
   pip install mlagents
-  pip install torch==2.0.1+cu117 -f https://download.pytorch.org/whl/torch_stable.html
+  pip install torch==2.0.1+cuxxx -f https://download.pytorch.org/whl/torch_stable.html
   pip install protobuf==3.20.3
   pip install packaging
   ```
