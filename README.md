@@ -6,7 +6,7 @@
 - Autonomous control for safe descent powered by Reinforcement Learning policy
 
 ## Installation steps
-### Prerequisite spftware
+### Prerequisite software
 - Unity: 2022.3.14f1
 - Python 3.9.13
 
