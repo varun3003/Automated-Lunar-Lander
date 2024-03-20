@@ -17,7 +17,7 @@
   ```
 3. Activate virtual environment
   ```
-  .\venv\Scripts\python
+  .\venv\Scripts\activate
   ```
 3. Install dependencies
   - no GPU
