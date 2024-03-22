@@ -11,9 +11,6 @@ public class LanderController : MonoBehaviour {
 
     private Rigidbody landerRigidbody;
     private AgentController agentController;
-    [SerializeField] private Material winMaterial;
-    [SerializeField] private Material loseMaterial;
-    [SerializeField] private MeshRenderer landingSiteRenderer;
 
     private bool thrusterOn;
 
@@ -90,43 +87,23 @@ public class LanderController : MonoBehaviour {
 
         // Out of bounds reset, large negative reward
         if(position.y > 200f) {
-            landingSiteRenderer.material = loseMaterial;
             Debug.Log("Escaped");
             agentController.EndEpisode(-1f);
         }
 
         //REWARDS
         //velocity tracking reward
-        if(velocity.y > 0) {
-            agentController.AddReward(-1f); // large negative reward for upward movement
-        }
-        else if (velocity.y < -4f) {
-            agentController.AddReward(0.8f);
+        if (position.y <= 200f) {
+            float referenceVelocity = ReferenceVelocity(position.y);
+            agentController.AddReward(VelocityReward(velocity.y, referenceVelocity));
         }
         else {
-            agentController.AddReward(-0.4f);
+            ;
         }
 
         //attitude tracking reward
-        if (Mathf.Abs(rotation.x) < 10f) {
-            agentController.AddReward(0.5f);
-        }
-        else if (Mathf.Abs(rotation.x) < 5f) {
-            agentController.AddReward(0.8f);
-        }
-        else {
-            agentController.AddReward(-0.8f);
-        }
-        
-        if (Mathf.Abs(rotation.z) < 10f) {
-            agentController.AddReward(0.5f);
-        }
-        else if (Mathf.Abs(rotation.x) < 5f) {
-            agentController.AddReward(0.8f);
-        }
-        else {
-            agentController.AddReward(-0.8f);
-        }
+        agentController.AddReward(AttitudeReward(Mathf.Abs(rotation.x)));
+        agentController.AddReward(AttitudeReward(Mathf.Abs(rotation.z)));
         
 
         //angular velocity tracking reward
@@ -146,12 +123,11 @@ public class LanderController : MonoBehaviour {
         if (landerRigidbody.IsSleeping()) {
             if (Mathf.Abs(rotation.x) < 20f && Mathf.Abs(rotation.z) < 20f){
                 agentController.EndEpisode(1f);
-                landingSiteRenderer.material = winMaterial;
                 Debug.Log("Success");
             }
             else {
                 agentController.EndEpisode(0f);
-                landingSiteRenderer.material = loseMaterial;
+
                 Debug.Log("Tipped over");
             }
         }
@@ -168,6 +144,19 @@ public class LanderController : MonoBehaviour {
         }
     }
 
+    private float AttitudeReward(float tilt) {
+        float result = (float)(-1 * Mathf.Abs((float)System.Math.Tanh(0.05 * tilt)) + 0.5);
+        return result;
+    }
+    private float ReferenceVelocity(float altitude) {
+        return -2 * Mathf.Exp(altitude / 100) + 1;
+    }
+
+    private float VelocityReward(float velocity, float referenceVelocity) {
+        float innerExpression = referenceVelocity - velocity;
+        float result = -2 * Mathf.Abs((float)System.Math.Tanh(0.5*innerExpression)) + 1;
+        return result;
+    }
     private void DrawEngineRays(Vector3 worldForce, Vector3 worldPointApplication, float scale) {
         Debug.DrawRay(worldPointApplication, worldForce.normalized * -1 * scale, Color.red);
     }
@@ -329,12 +318,12 @@ public class LanderController : MonoBehaviour {
     void OnCollisionEnter(Collision collision) {
         if (collision.relativeVelocity.y > 5) {
             agentController.EndEpisode(0f);
-            landingSiteRenderer.material = loseMaterial;
+
             Debug.Log("Crashed");
         }
         if (Mathf.Abs(GetRotation().x) > 40f && Mathf.Abs(GetRotation().z) > 40f) {
             agentController.EndEpisode(0f);
-            landingSiteRenderer.material = loseMaterial;
+
             Debug.Log("Excess tilt");
         }
     }
