@@ -10,19 +10,36 @@
 
 import UdpComms as U
 import time
+import math
 
 # Create UDP socket to use for sending (and receiving)
 sock = U.UdpComms(udpIP="127.0.0.1", portTX=8000, portRX=8001, enableRX=True, suppressWarnings=True)
 
-i = 0
+#i = 0
+
+
+def getFOV(posx, posy, posz):
+    width = posy * math.tan(math.pi/12)
+    fovX = int(posx - width)
+    fovZ = int(posz - width)
+    size = int(width * 2)
+    return fovX,fovZ,size
 
 while True:
-    sock.SendData('Sent from Python: ' + str(i)) # Send this string to other application
-    i += 1
+    #sock.SendData('Sent from Python: ' + str(i)) # Send this string to other application
+    #i += 1
 
     data = sock.ReadReceivedData() # read data
 
     if data != None: # if NEW data has been received since last ReadReceivedData function call
+        position = [float(val) for val in data.split(",")]
+        
         print(data) # print new received data
+        # Print the received FOV values
+        print("Received Position values:", position)
+        print("Calculated FOV: ",getFOV(position[0],position[1],position[2]))
+        time.sleep(5)
+        sock.SendData(f"Calculated FOV: {getFOV(position[0],position[1],position[2])}") # Send this string to other application
 
     time.sleep(1)
+

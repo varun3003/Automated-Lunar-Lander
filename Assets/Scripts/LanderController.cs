@@ -11,6 +11,7 @@ public class LanderController : MonoBehaviour {
 
     private Rigidbody landerRigidbody;
     private AgentController agentController;
+    private UdpSocket udpSocket;
 
     private bool thrusterOn;
 
@@ -47,6 +48,7 @@ public class LanderController : MonoBehaviour {
     {
         landerRigidbody = GetComponent<Rigidbody>();
         agentController = GetComponent<AgentController>();
+        udpSocket = GetComponent<UdpSocket>();
 
         thrusterOn = false;
         
@@ -86,10 +88,12 @@ public class LanderController : MonoBehaviour {
         Vector3 angularVelocity = GetAngularVelocity();
 
         // Out of bounds reset, large negative reward
-        if(position.y > 200f) {
+        if(position.y > 1100f) {
             Debug.Log("Escaped");
             agentController.EndEpisode(-1f);
         }
+
+        SendPosition(position.x,position.y,position.z);
 
         //REWARDS
         //velocity tracking reward
@@ -162,10 +166,15 @@ public class LanderController : MonoBehaviour {
     }
 
     public void ResetPosition() {
-        transform.localPosition = new Vector3(Random.Range(-40f,40f), Random.Range(80f,100f), Random.Range(-40f, 40f));
+        transform.localPosition = new Vector3(1025f + Random.Range(-40f,40f), Random.Range(800f,1000f), 1025f + Random.Range(-40f, 40f));
         transform.localEulerAngles = new Vector3(Random.Range(-20f, 20f), 0f, Random.Range(-20f, 20f)); 
-        landerRigidbody.velocity = new Vector3(0, 0, 0);
+        landerRigidbody.velocity = new Vector3(Random.Range(-5f, 5f), Random.Range(-40f, 0f), Random.Range(-5f, 5f));
         landerRigidbody.angularVelocity = new Vector3(0,0,0);
+    }
+
+    private void SendPosition(float posX, float posY, float posZ) {
+        string message = posX.ToString() + "," + posY.ToString() + "," + posZ.ToString();
+        udpSocket.SendData(message);
     }
 
     private float GetAltitude() {

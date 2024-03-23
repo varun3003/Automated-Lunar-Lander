@@ -6,7 +6,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 
-public class UDP : MonoBehaviour
+public class UdpSocket : MonoBehaviour
 {
     [HideInInspector] public bool isTxStarted = false;
 
@@ -20,7 +20,7 @@ public class UDP : MonoBehaviour
     UdpClient client;
     IPEndPoint remoteEndPoint;
     Thread receiveThread; // Receiving Thread
-
+    /*
     IEnumerator SendDataCoroutine() // DELETE THIS: Added to show sending data from Unity to Python via UDP
     {
         while (true) {
@@ -29,6 +29,7 @@ public class UDP : MonoBehaviour
             yield return new WaitForSeconds(1f);
         }
     }
+    */
 
     public void SendData(string message) // Use to send data to Python
     {
@@ -57,7 +58,7 @@ public class UDP : MonoBehaviour
         // Initialize (seen in comments window)
         print("UDP Comms Initialised");
 
-        StartCoroutine(SendDataCoroutine()); // DELETE THIS: Added to show sending data from Unity to Python via UDP
+        //StartCoroutine(SendDataCoroutine()); // DELETE THIS: Added to show sending data from Unity to Python via UDP
     }
 
     // Receive data, update packets received
