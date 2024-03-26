@@ -18,13 +18,13 @@ def resize_dem(dem_array, new_size, original_pixel_size):
     return resized_dem, new_pixel_size_x
 
 # Load the DEM array
-input_dem_path = 'DEMS/dem2.tif'
+input_dem_path = 'DEMS/dem1.tif'
 with rasterio.open(input_dem_path) as src:
     dem_array = src.read(1)  # Read the first band
 
 # Define the parameters
-posX, posY = 1000, 300
-size = 100
+posX, posY = 1000, 700
+size = 1000
 new_size = (64, 64)
 
 # Step 1: Crop the DEM array
@@ -100,6 +100,14 @@ if contours:
     plt.axis('off')
     plt.show()
 
+    # reduce size
+    safety_map_processed = np.uint8((safety_map_processed - safety_map_processed.min()) / (safety_map_processed.max() - safety_map_processed.min()) * 255)
+
     # Print the centroid coordinates
     print("Centroid coordinates (x, y):", ( cx, cy, pixel_size_x))
     print("Centroid coordinates (x, y):", ( int(posX + cx*pixel_size_x), int(posY + cy*pixel_size_x)))
+
+    
+
+    
+    

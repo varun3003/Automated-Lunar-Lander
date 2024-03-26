@@ -168,7 +168,7 @@ public class LanderController : MonoBehaviour {
     public void ResetPosition() {
         transform.localPosition = new Vector3(1025f + Random.Range(-40f,40f), Random.Range(800f,1000f), 1025f + Random.Range(-40f, 40f));
         transform.localEulerAngles = new Vector3(Random.Range(-20f, 20f), 0f, Random.Range(-20f, 20f)); 
-        landerRigidbody.velocity = new Vector3(Random.Range(-5f, 5f), Random.Range(-40f, 0f), Random.Range(-5f, 5f));
+        landerRigidbody.velocity = new Vector3(Random.Range(-20f, 20f), Random.Range(-40f, 0f), Random.Range(-20f, 20f));
         landerRigidbody.angularVelocity = new Vector3(0,0,0);
     }
 

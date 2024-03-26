@@ -12,19 +12,112 @@ import UdpComms as U
 import time
 import math
 
+#safety map imports
+import rasterio
+import numpy as np
+import matplotlib.pyplot as plt
+from rasterio.windows import Window
+from scipy.ndimage import generic_filter, median_filter, minimum_filter #, maximum_filter
+import cv2
+
 # Create UDP socket to use for sending (and receiving)
 sock = U.UdpComms(udpIP="127.0.0.1", portTX=8000, portRX=8001, enableRX=True, suppressWarnings=True)
 
-#i = 0
-
+# load dataset
+# Load the DEM array
+input_dem_path = 'DEMS/dem1.tif'
+with rasterio.open(input_dem_path) as src:
+    dem_array = src.read(1)  # Read the first band
 
 def getFOV(posx, posy, posz):
     width = posy * math.tan(math.pi/12)
     fovX = int(posx - width)
     fovZ = int(posz - width)
-    size = int(width * 2)
+    size = max(1,int(width * 2))
     return fovX,fovZ,size
 
+def crop_dem(dem_array, posX, posY, size):
+    cropped_dem = dem_array[posY:posY+size, posX:posX+size]
+    return cropped_dem
+
+def resize_dem(dem_array, new_size, original_pixel_size):
+    resized_dem = cv2.resize(dem_array, new_size, interpolation=cv2.INTER_NEAREST)
+    
+    # Calculate the new pixel size
+    new_pixel_size_x = original_pixel_size * dem_array.shape[1] / new_size[0]
+    
+    return resized_dem, new_pixel_size_x
+
+# Function to calculate roughness for a neighborhood
+def calculate_roughness(arr, pixel_size):
+    central_pixel = arr[len(arr) // 2]  # Get the central pixel value
+    max_difference = np.max(np.abs(arr - central_pixel))   # Calculate the maximum difference
+    return max_difference
+
+# Function to classify safety based on slope and roughness
+def classify_safety(slope, roughness, pixel_size_x):
+    safe_mask = np.logical_and(slope < 5, roughness < pixel_size_x)
+    return safe_mask
+
+# Function to apply post-processing steps
+def postprocess_safety(safety_map, pixel_size_x):
+    # Define the kernel for morphological operations
+    kernel_size = max(3, int(15/pixel_size_x))  # Adjust as needed
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (kernel_size, kernel_size))
+
+    # Perform opening operation
+    safety_map_opened = cv2.morphologyEx(safety_map.astype(np.uint8), cv2.MORPH_OPEN, kernel)
+
+    return safety_map_opened
+
+def TerrainProcess(fovX, fovY, size):
+    # Step 1: Crop the DEM array
+    cropped_dem = crop_dem(dem_array, fovX, fovY, size)
+
+    # Step 2: Resize the cropped DEM array
+    resized_dem, pixel_size_x = resize_dem(cropped_dem, (64, 64), 1)
+
+    # Calculate slope using NumPy gradient
+    dzdx, dzdy = np.gradient(resized_dem, pixel_size_x)
+    slope_rad = np.arctan(np.sqrt(dzdx**2 + dzdy**2))
+
+    # Convert slope to degrees
+    slope_deg = np.degrees(slope_rad)
+
+    # Define the size of the neighborhood (e.g., 3x3)
+    neighborhood_size = 3
+
+    # Calculate surface roughness using a moving window
+    roughness_array = generic_filter(resized_dem, calculate_roughness, size=neighborhood_size, extra_arguments=(pixel_size_x,))
+
+    # Classify safety based on slope and roughness criteria
+    safety_map = classify_safety(slope_deg, roughness_array, pixel_size_x)
+
+    # Post-process the safety map
+    safety_map_processed = postprocess_safety(safety_map,pixel_size_x)   
+
+    # Step 2: Find contours
+    contours, _ = cv2.findContours(safety_map_processed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    # Step 3: Determine the largest blob
+    if contours:
+        largest_contour = max(contours, key=cv2.contourArea)
+
+        # Step 4: Find a point in the interior of the largest blob
+        M = cv2.moments(largest_contour)
+        cx = int(M['m10'] / M['m00'])
+        cy = int(M['m01'] / M['m00'])
+
+        # reduce size
+        safety_map_processed = np.uint8((safety_map_processed - safety_map_processed.min()) / (safety_map_processed.max() - safety_map_processed.min()) * 255)
+
+        # Print the centroid coordinates
+        print("Centroid coordinates (x, y):", ( cx, cy, pixel_size_x))
+        print("Centroid coordinates (x, y):", ( int(fovX + cx*pixel_size_x), int(fovY + cy*pixel_size_x)))
+
+        return cx, cy, int(fovX + cx*pixel_size_x), int(fovY + cy*pixel_size_x)
+
+print("server active")
 while True:
     #sock.SendData('Sent from Python: ' + str(i)) # Send this string to other application
     #i += 1
@@ -34,12 +127,14 @@ while True:
     if data != None: # if NEW data has been received since last ReadReceivedData function call
         position = [float(val) for val in data.split(",")]
         
-        print(data) # print new received data
+        # print(data) # print new received data
         # Print the received FOV values
         print("Received Position values:", position)
-        print("Calculated FOV: ",getFOV(position[0],position[1],position[2]))
-        time.sleep(5)
-        sock.SendData(f"Calculated FOV: {getFOV(position[0],position[1],position[2])}") # Send this string to other application
+        fovCoords = getFOV(position[0],position[1],position[2])
+        print("Calculated FOV: ", fovCoords)
 
-    time.sleep(1)
+        landingSite = TerrainProcess(fovCoords[0],fovCoords[1],fovCoords[2])
+        sock.SendData(f"Calculated landing site: {landingSite}") # Send this string to other application
+
+    # time.sleep(1)
 

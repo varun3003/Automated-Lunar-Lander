@@ -14,8 +14,6 @@ public class UdpSocket : MonoBehaviour
     [SerializeField] int rxPort = 8000; // port to receive data from Python on
     [SerializeField] int txPort = 8001; // port to send data to Python on
 
-    int i = 0; // DELETE THIS: Added to show sending data from Unity to Python via UDP
-
     // Create necessary UdpClient objects
     UdpClient client;
     IPEndPoint remoteEndPoint;
