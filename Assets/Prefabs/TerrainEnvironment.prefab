@@ -120,6 +120,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Lander
       objectReference: {fileID: 0}
+    - target: {fileID: 7973656436785811709, guid: 1a8c7c63e7e40c8418cc7b3dcd69e148,
+        type: 3}
+      propertyPath: m_BrainParameters.VectorObservationSize
+      value: 12
+      objectReference: {fileID: 0}
     - target: {fileID: 8517202440596115737, guid: 1a8c7c63e7e40c8418cc7b3dcd69e148,
         type: 3}
       propertyPath: m_LocalPosition.x

@@ -16,6 +16,7 @@ mlagents_envs==0.30.0
 mpmath==1.3.0
 networkx==3.2.1
 numpy==1.21.2
+onnx==1.16.0
 packaging==24.0
 PettingZoo==1.15.0
 pillow==10.2.0

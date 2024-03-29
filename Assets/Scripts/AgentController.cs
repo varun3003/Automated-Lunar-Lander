@@ -22,6 +22,7 @@ public class AgentController : Agent {
     }
 
     public override void CollectObservations(VectorSensor sensor) {
+        Vector2 targetPosition = landerController.GetTarget();
         Vector3 rocketPosition = landerController.GetPosition();
         Vector3 rocketVelocity = landerController.GetVelocity();
         Vector3 rocketAngularVelocity = landerController.GetAngularVelocity();
@@ -34,8 +35,8 @@ public class AgentController : Agent {
         sensor.AddObservation(rocketPosition.y);
         sensor.AddObservation(rocketPosition.z);
 
-        //sensor.AddObservation(targetX);
-        //sensor.AddObservation(targetZ);
+        sensor.AddObservation(targetPosition.x);
+        sensor.AddObservation(targetPosition.y);
 
         sensor.AddObservation(rocketVelocity.x);
         sensor.AddObservation(rocketVelocity.y);

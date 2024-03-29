@@ -70,7 +70,14 @@ def postprocess_safety(safety_map, pixel_size_x):
 
     return safety_map_opened
 
+prev_cx = None
+prev_cy = None
+prev_global_cx = None
+prev_global_cy = None
+
 def TerrainProcess(fovX, fovY, size):
+    global prev_cx, prev_cy, prev_global_cx, prev_global_cy
+
     # Step 1: Crop the DEM array
     cropped_dem = crop_dem(dem_array, fovX, fovY, size)
 
@@ -111,11 +118,30 @@ def TerrainProcess(fovX, fovY, size):
         # reduce size
         safety_map_processed = np.uint8((safety_map_processed - safety_map_processed.min()) / (safety_map_processed.max() - safety_map_processed.min()) * 255)
 
-        # Print the centroid coordinates
-        print("Centroid coordinates (x, y):", ( cx, cy, pixel_size_x))
-        print("Centroid coordinates (x, y):", ( int(fovX + cx*pixel_size_x), int(fovY + cy*pixel_size_x)))
+        # Calculate global centroid
+        global_cx = int(fovX + cx * pixel_size_x)
+        global_cy = int(fovY + cy * pixel_size_x)
 
-        return cx, cy, int(fovX + cx*pixel_size_x), int(fovY + cy*pixel_size_x)
+        # Print the centroid coordinates
+        print("Centroid coordinates (x, y):", (cx, cy, pixel_size_x))
+        print("Global Centroid coordinates (x, y):", (global_cx, global_cy))
+
+        # Update previous values
+        prev_cx = cx
+        prev_cy = cy
+        prev_global_cx = global_cx
+        prev_global_cy = global_cy
+
+        return safety_map_processed, cx, cy, global_cx, global_cy
+    else:
+        # If no contour is found, return previous values
+        if prev_cx is not None and prev_cy is not None and prev_global_cx is not None and prev_global_cy is not None:
+            return np.zeros((64, 64), dtype=np.uint8), prev_cx, prev_cy, prev_global_cx, prev_global_cy
+        else:
+            # If there are no previous values, return zeros
+            return np.zeros((64, 64), dtype=np.uint8), 0, 0, 0, 0
+
+
 
 print("server active")
 while True:
@@ -133,8 +159,15 @@ while True:
         fovCoords = getFOV(position[0],position[1],position[2])
         print("Calculated FOV: ", fovCoords)
 
-        landingSite = TerrainProcess(fovCoords[0],fovCoords[1],fovCoords[2])
-        sock.SendData(f"Calculated landing site: {landingSite}") # Send this string to other application
+        landingSite, cx, cy, global_cx, global_cy = TerrainProcess(fovCoords[0], fovCoords[1], fovCoords[2])
+        
+        # Pack the processed safety map and centroid coordinates into a byte array
+        # You may need to adjust the data types depending on the size and range of values
+        # Pack the processed safety map and centroid coordinates into a string
+        data_to_send = f"{','.join(map(str, landingSite.flatten()))}"
+        data_to_send = f"{data_to_send};{cx};{cy};{global_cx};{global_cy}"
+        sock.SendData(data_to_send)  # Send the string to Unity
+        print(f"Sent data to Unity: Processed safety map and centroid coordinates ({cx}, {cy}, {global_cx}, {global_cy})")
 
-    # time.sleep(1)
+    time.sleep(1)
 
