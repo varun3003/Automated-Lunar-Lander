@@ -8,124 +8,42 @@ using UnityEngine.PlayerLoop;
 using UnityEngine.Rendering;
 using UnityEngine.UI;
 
-public class LanderController : MonoBehaviour {
+public class TrainingLanderController : MonoBehaviour {
 
     private Rigidbody landerRigidbody;
-    private AgentController agentController;
-    private UdpSocket udpSocket;
+    private TrainingAgentController agentController;
 
-    public RawImage safetyMapImage; // Reference to RawImage UI element
+    [SerializeField] private Material winMaterial;
+    [SerializeField] private Material loseMaterial;
+    [SerializeField] private MeshRenderer landingSiteRenderer;
 
     private bool thrusterOn;
-
-    /*
-    private bool rcs0up;
-    private bool rcs0down;
-    private bool rcs0pitch;
-    private bool rcs0yaw;
-
-    private bool rcs1up;
-    private bool rcs1down;
-    private bool rcs1pitch;
-    private bool rcs1yaw;
-
-    private bool rcs2up;
-    private bool rcs2down;
-    private bool rcs3pitch;
-    private bool rcs3yaw;
-
-    private bool rcs4up;
-    private bool rcs4down;
-    private bool rcs4pitch;
-    private bool rcs4yaw;
-    */
 
     private bool rcsPitchPosOn;
     private bool rcsPitchNegOn;
     private bool rcsYawPosOn;
     private bool rcsYawNegOn;
-    private int[] centroidData;
+
+    [SerializeField] private float targetX;
+    [SerializeField] private float targetY;
 
 
     // Start is called before the first frame update
     void Start() {
         landerRigidbody = GetComponent<Rigidbody>();
-        agentController = GetComponent<AgentController>();
-        udpSocket = GetComponent<UdpSocket>();
+        agentController = GetComponent<TrainingAgentController>();
 
         thrusterOn = false;
-
-        /*
-        rcs0up = false;
-        rcs0down = false;
-        rcs0pitch = false;
-        rcs0yaw = false;
-
-        rcs1up = false;
-        rcs1down = false;
-        rcs1pitch = false;
-        rcs1yaw = false;
-
-        rcs2up = false;
-        rcs2down = false;
-        rcs3pitch = false;
-        rcs3yaw = false;
-
-        rcs4up = false;
-        rcs4down = false;
-        rcs4pitch = false;
-        rcs4yaw = false;
-        */
 
         rcsPitchPosOn = false;
         rcsPitchNegOn = false;
         rcsYawPosOn = false;
         rcsYawNegOn = false;
-    }
-
-    // Method to update the texture on the UI element (RawImage) using the received safety map data
-    private void UpdateSafetyMapTexture(int[] safetyMapData, int cx, int cy) {
-        // Assuming safetyMapData represents the color values for the texture
-        Texture2D texture = new Texture2D(64, 64); // Assuming 64x64 image size
-
-        // Iterate over each pixel in the image
-        for (int y = 0; y < 64; y++) {
-            for (int x = 0; x < 64; x++) {
-                // Calculate the index of the current pixel in the safetyMapData array
-                int index = y * 64 + x;
-
-                // Get the pixel value from safetyMapData (0 for black, 255 for white)
-                int pixelValue = safetyMapData[index];
-
-                // Convert the pixel value to a Color (assuming grayscale)
-                Color pixelColor = new Color(pixelValue / 255f, pixelValue / 255f, pixelValue / 255f);
-
-                // Set the pixel color in the texture
-                texture.SetPixel(x, y, pixelColor);
-            }
-        }
-
-        texture.SetPixel(31, 31, new Color(0f, 0f, 255f));
-        texture.SetPixel(30, 31, new Color(0f, 0f, 255f));
-        texture.SetPixel(32, 31, new Color(0f, 0f, 255f));
-        texture.SetPixel(31, 30, new Color(0f, 0f, 255f));
-        texture.SetPixel(31, 32, new Color(0f, 0f, 255f));
-
-        texture.SetPixel(cx, cy, new Color(0f, 255f, 0f));
-        texture.SetPixel(cx + 1, cy + 1, new Color(0f, 255f, 0f));
-        texture.SetPixel(cx - 1, cy - 1, new Color(0f, 255f, 0f));
-        texture.SetPixel(cx - 1, cy + 1, new Color(0f, 255f, 0f));
-        texture.SetPixel(cx + 1, cy - 1, new Color(0f, 255f, 0f));
-
-        // Apply the changes to the texture
-        texture.Apply();
-
-        // Assign the texture to the RawImage
-        safetyMapImage.texture = texture;
+        targetX = 100f;
+        targetY = 100f;
     }
 
     // Update is called once per frame
-
     void FixedUpdate() {
         Vector3 position = GetPosition();
         Vector3 velocity = GetVelocity();
@@ -133,30 +51,18 @@ public class LanderController : MonoBehaviour {
         // Vector3 angularVelocity = GetAngularVelocity();
 
         // Out of bounds reset, large negative reward
-        if (position.y > 1100f) {
+        if (transform.position.y > 250f || transform.position.y < -1f) {
+
+            landingSiteRenderer.material = loseMaterial;
+
             Debug.Log("Escaped");
             agentController.EndEpisode(-1f);
-        }
-
-        SendPosition(position.x, position.y, position.z);
-
-        int[] safetyMapData = udpSocket.GetSafetyMapData();
-        centroidData = udpSocket.GetCentroidData();
-
-        if (safetyMapData != null) {
-            // Update texture
-            UpdateSafetyMapTexture(safetyMapData, centroidData[0], centroidData[1]);
-        }
-
-        if (centroidData != null) {
-            // Print centroid data
-            //Debug.Log("Centroid Data: cx = " + centroidData[0] + ", cy = " + centroidData[1] + ", global_cx = " + centroidData[2] + ", global_cy = " + centroidData[3]);
         }
 
         //REWARDS
         //velocity tracking reward
         float referenceVelocity = ReferenceVelocity(position.y);
-        agentController.AddReward(VelocityReward(velocity.y, referenceVelocity));
+        agentController.AddReward(VerticalVelocityReward(velocity.y, referenceVelocity));
         
 
         //attitude tracking reward
@@ -164,12 +70,13 @@ public class LanderController : MonoBehaviour {
         agentController.AddReward(AttitudeReward(Mathf.Abs(rotation.z)));
 
         //target tracking reward
-        agentController.AddReward(TargetReward(position));
+        //agentController.AddReward(TargetReward(position));
 
         // Safe landing check
         if (landerRigidbody.IsSleeping()) {
             if (Mathf.Abs(rotation.x) < 20f && Mathf.Abs(rotation.z) < 20f) {
-                if (Vector3.Distance(GetPosition(), new Vector3(centroidData[2], 0f, centroidData[3])) > 5f) {
+                /* add in target tracking later
+                if (Vector3.Distance(GetPosition(), new Vector3(targetX, 0f, targetY)) > 5f) {
                     agentController.EndEpisode(0f);
                     Debug.Log("Too far from spot");
                 }
@@ -177,40 +84,46 @@ public class LanderController : MonoBehaviour {
                     agentController.EndEpisode(100f);
                     Debug.Log("Success");
                 }
+                */
+                landingSiteRenderer.material = winMaterial;
+
+                agentController.EndEpisode(100f);
+                Debug.Log("Success");
             }
             else {
-                agentController.EndEpisode(0f);
+                landingSiteRenderer.material = loseMaterial;
 
+                agentController.EndEpisode(0f);
                 Debug.Log("Tipped over");
             }
         }
 
-        //Debug.Log("Position X: " + position.x + " Y : " + position.y + " Z : " + position.z); //+
-        //    "\nVelocity X: " + velocity.x + " Y : " + velocity.y + " Z : " + velocity.z +
-        //    "\nRotation X: " + rotation.x + " Y : " + rotation.y + " Z : " + rotation.z);
-        //   "Angular Velocity X: " + angularVelocity.x + " Y : " + angularVelocity.y + " Z : " + angularVelocity.z);
+        Debug.Log("Position X: " + position.x + " Y : " + position.y + " Z : " + position.z +
+            "\nVelocity X: " + velocity.x + " Y : " + velocity.y + " Z : " + velocity.z +
+            "\nRotation X: " + rotation.x + " Y : " + rotation.y + " Z : " + rotation.z);
 
         //Actuator calls
-        if (position.y > 2f) {
+        if (position.y > 1f) {
             MainThrusterControl();
             RCSThrusterControl();
         }
     }
 
     private float AttitudeReward(float tilt) {
-        float result = (float)(-1 * Mathf.Abs((float)System.Math.Tanh(0.05 * tilt)) + 0.5);
+        float result = -2f * Mathf.Abs((float)System.Math.Tanh(0.1f * tilt)) + 1f;
         return result;
     }
     private float ReferenceVelocity(float altitude) {
-        return -3 * Mathf.Exp(altitude / 300) + 1;
+        return -20 * Mathf.Exp(0.01f * altitude - 0.3f);
     }
 
-    private float VelocityReward(float velocity, float referenceVelocity) {
-        float innerExpression = referenceVelocity - velocity;
-        float result = -2 * Mathf.Abs((float)System.Math.Tanh(0.5 * innerExpression)) + 1;
+    private float VerticalVelocityReward(float velocity, float referenceVelocity) {
+        float deviation = referenceVelocity - velocity;
+        float result = -2f * Mathf.Abs((float)System.Math.Tanh(0.1f * deviation)) + 1f;
         return result;
     }
 
+    /* Target tracking reward function
     private float TargetReward(Vector3 position) {
         float distance = Vector3.Distance(position, new Vector3(centroidData[2], position.y, centroidData[3]));
         float result;
@@ -232,21 +145,23 @@ public class LanderController : MonoBehaviour {
             result = 1f;
         return result;
     }
+    */
+
     private void DrawEngineRays(Vector3 worldForce, Vector3 worldPointApplication, float scale) {
         Debug.DrawRay(worldPointApplication, worldForce.normalized * -1 * scale, Color.red);
     }
 
     public void ResetPosition() {
-        float velocity = 5f;
-        transform.localPosition = new Vector3(1025f + Random.Range(-400f, 400f), Random.Range(800f, 1000f), 1025f + Random.Range(-400f, 400f));
-        transform.localEulerAngles = new Vector3(Random.Range(-5f, 5f), 0f, Random.Range(-5f, 5f));
-        landerRigidbody.velocity = new Vector3(Random.Range(-velocity, velocity), Random.Range(-20f, 0f), Random.Range(-velocity, velocity));
-        landerRigidbody.angularVelocity = new Vector3(0, 0, 0);
-    }
+        float velocity = 0f;
+        float randomVerticalVelocity = 10f;
+        float randomPosition = 20f;
+        float centerPosition = 50f;
 
-    private void SendPosition(float posX, float posY, float posZ) {
-        string message = posX.ToString() + "," + posY.ToString() + "," + posZ.ToString();
-        udpSocket.SendData(message);
+        float randomAngle = 5f;
+        transform.localPosition = new Vector3(centerPosition + Random.Range(-randomPosition, randomPosition), Random.Range(200f, 220f), centerPosition + Random.Range(-randomPosition, randomPosition));
+        transform.localEulerAngles = new Vector3(Random.Range(-randomAngle, randomAngle), 0f, Random.Range(-randomAngle, randomAngle));
+        landerRigidbody.velocity = new Vector3(Random.Range(-velocity, velocity), Random.Range(-randomVerticalVelocity, 0f), Random.Range(-velocity, velocity));
+        landerRigidbody.angularVelocity = new Vector3(0, 0, 0);
     }
 
     private float GetAltitude() {
@@ -264,7 +179,7 @@ public class LanderController : MonoBehaviour {
     }
 
     public Vector2 GetTarget() {
-        Vector2 target = new Vector2(centroidData[2], centroidData[3]);
+        Vector2 target = new Vector2(targetX, targetY);
         return target;
     }
 
@@ -403,14 +318,18 @@ public class LanderController : MonoBehaviour {
 
     void OnCollisionEnter(Collision collision) {
         if (collision.relativeVelocity.y > 2f) {
+            landingSiteRenderer.material = loseMaterial;
+            Debug.Log("Crashed");
+
             agentController.EndEpisode(0f);
 
-            Debug.Log("Crashed");
         }
         if (Mathf.Abs(GetRotation().x) > 40f && Mathf.Abs(GetRotation().z) > 40f) {
+            landingSiteRenderer.material = loseMaterial;
+            Debug.Log("Excess tilt");
+
             agentController.EndEpisode(0f);
 
-            Debug.Log("Excess tilt");
         }
     }
 }

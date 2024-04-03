@@ -77,7 +77,15 @@ prev_global_cy = None
 
 def TerrainProcess(fovX, fovY, size):
     global prev_cx, prev_cy, prev_global_cx, prev_global_cy
-
+    
+    if size == 0:
+        # If no contour is found, return previous values
+        if prev_cx is not None and prev_cy is not None and prev_global_cx is not None and prev_global_cy is not None:
+            return np.zeros((64, 64), dtype=np.uint8), prev_cx, prev_cy, prev_global_cx, prev_global_cy
+        else:
+            # If there are no previous values, return zeros
+            return np.zeros((64, 64), dtype=np.uint8), 0, 0, 0, 0
+        
     # Step 1: Crop the DEM array
     cropped_dem = crop_dem(dem_array, fovX, fovY, size)
 
@@ -123,8 +131,8 @@ def TerrainProcess(fovX, fovY, size):
         global_cy = int(fovY + cy * pixel_size_x)
 
         # Print the centroid coordinates
-        print("Centroid coordinates (x, y):", (cx, cy, pixel_size_x))
-        print("Global Centroid coordinates (x, y):", (global_cx, global_cy))
+        #print("Centroid coordinates (x, y):", (cx, cy, pixel_size_x))
+        #print("Global Centroid coordinates (x, y):", (global_cx, global_cy))
 
         # Update previous values
         prev_cx = cx
@@ -155,9 +163,9 @@ while True:
         
         # print(data) # print new received data
         # Print the received FOV values
-        print("Received Position values:", position)
+        #print("Received Position values:", position)
         fovCoords = getFOV(position[0],position[1],position[2])
-        print("Calculated FOV: ", fovCoords)
+        #print("Calculated FOV: ", fovCoords)
 
         landingSite, cx, cy, global_cx, global_cy = TerrainProcess(fovCoords[0], fovCoords[1], fovCoords[2])
         
@@ -167,7 +175,7 @@ while True:
         data_to_send = f"{','.join(map(str, landingSite.flatten()))}"
         data_to_send = f"{data_to_send};{cx};{cy};{global_cx};{global_cy}"
         sock.SendData(data_to_send)  # Send the string to Unity
-        print(f"Sent data to Unity: Processed safety map and centroid coordinates ({cx}, {cy}, {global_cx}, {global_cy})")
+        #print(f"Sent data to Unity: Processed safety map and centroid coordinates ({cx}, {cy}, {global_cx}, {global_cy})")
 
     time.sleep(1)
 

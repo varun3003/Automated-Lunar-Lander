@@ -1,4 +1,35 @@
 {
+    "LunarLander": {
+        "checkpoints": [
+            {
+                "steps": 55672,
+                "file_path": "results\\Final1\\LunarLander\\LunarLander-55672.onnx",
+                "reward": -1478.8577958742778,
+                "creation_time": 1711698474.1001,
+                "auxillary_file_paths": [
+                    "results\\Final1\\LunarLander\\LunarLander-55672.pt"
+                ]
+            },
+            {
+                "steps": 137633,
+                "file_path": "results\\Final1\\LunarLander\\LunarLander-137633.onnx",
+                "reward": -1612.9912229025806,
+                "creation_time": 1711704961.7385175,
+                "auxillary_file_paths": [
+                    "results\\Final1\\LunarLander\\LunarLander-137633.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 137633,
+            "file_path": "results\\Final1\\LunarLander.onnx",
+            "reward": -1612.9912229025806,
+            "creation_time": 1711704961.7385175,
+            "auxillary_file_paths": [
+                "results\\Final1\\LunarLander\\LunarLander-137633.pt"
+            ]
+        }
+    },
     "metadata": {
         "stats_format_version": "0.3.0",
         "mlagents_version": "0.30.0",
