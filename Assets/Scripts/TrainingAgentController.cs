@@ -54,10 +54,14 @@ public class TrainingAgentController : Agent {
     public override void OnActionReceived(ActionBuffers actions) {
         landerController.SetThrusterState(actions.DiscreteActions[0]);
         landerController.SetSimpleRCSThrusterState(actions.DiscreteActions[1], actions.DiscreteActions[2]);
-        AddReward(-1f / MaxStep);
+        AddReward(-2f/MaxStep);
     }
 
     public void EndEpisode(float reward) {
+        Vector2 targetPosition = landerController.GetTarget();
+        Vector3 position = landerController.GetPosition();
+        float deviation = Vector2.Distance(targetPosition, new Vector2(position.x, position.z));
+        Academy.Instance.StatsRecorder.Add("Performance/Target Deviation", deviation);
         AddReward(reward);
         EndEpisode();
     }
