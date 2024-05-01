@@ -1,0 +1,33 @@
+finalphase1a 
+- Achieve soft landing from 200m altitude
+- Mild starting tilt (5deg)
+- 0 initial velocity
+- No target tracking
+
+finalphase1b
+- Achieve soft landing from 500m altitude
+- Mild starting tilt (10deg)
+- 5m/s initial velocity
+- 10m/s initial velocity
+- No target tracking
+
+finalphase2a
+- Achieve soft landing from 500m altitude
+- Mild starting tilt (10deg)
+- 5m/s initial velocity
+- 10m/s initial velocity
+- Target Tracking (not criteria for success)
+
+finalphase2b
+- Achieve soft landing from 500m altitude
+- Mild starting tilt (10deg)
+- 5m/s initial velocity
+- 10m/s initial velocity
+- Target Tracking (not criteria for success)
+
+finalphase2c
+- Achieve soft landing from 500m altitude
+- Mild starting tilt (10deg)
+- 5m/s initial velocity
+- 10m/s initial velocity
+- Target Tracking (criteria for success)

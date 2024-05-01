@@ -63,6 +63,16 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5493330921353380502, guid: ef274c0ffd979484bb27571aeb69685c,
         type: 3}
+      propertyPath: m_LocalScale.x
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5493330921353380502, guid: ef274c0ffd979484bb27571aeb69685c,
+        type: 3}
+      propertyPath: m_LocalScale.z
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5493330921353380502, guid: ef274c0ffd979484bb27571aeb69685c,
+        type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
       objectReference: {fileID: 0}
@@ -144,7 +154,7 @@ PrefabInstance:
     - target: {fileID: 2087604190917230322, guid: 4d50a82b611734344a9405b62e6cb39d,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 500
       objectReference: {fileID: 0}
     - target: {fileID: 2087604190917230322, guid: 4d50a82b611734344a9405b62e6cb39d,
         type: 3}
@@ -154,7 +164,7 @@ PrefabInstance:
     - target: {fileID: 2087604190917230322, guid: 4d50a82b611734344a9405b62e6cb39d,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: 500
       objectReference: {fileID: 0}
     - target: {fileID: 2087604190917230322, guid: 4d50a82b611734344a9405b62e6cb39d,
         type: 3}
@@ -210,6 +220,17 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: TrainingLander
+      objectReference: {fileID: 0}
+    - target: {fileID: 9203633681151969914, guid: 4d50a82b611734344a9405b62e6cb39d,
+        type: 3}
+      propertyPath: m_Model
+      value: 
+      objectReference: {fileID: 5022602860645237092, guid: a35480b2bc597d74cbe0fed373466fe3,
+        type: 3}
+    - target: {fileID: 9203633681151969914, guid: 4d50a82b611734344a9405b62e6cb39d,
+        type: 3}
+      propertyPath: m_BehaviorType
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

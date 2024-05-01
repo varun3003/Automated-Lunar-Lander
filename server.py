@@ -89,9 +89,17 @@ def TerrainProcess(fovX, fovY, size):
     # Step 1: Crop the DEM array
     cropped_dem = crop_dem(dem_array, fovX, fovY, size)
 
-    # Step 2: Resize the cropped DEM array
-    resized_dem, pixel_size_x = resize_dem(cropped_dem, (64, 64), 1)
 
+    if ( len(cropped_dem) != 0):
+        # Step 2: Resize the cropped DEM array
+        resized_dem, pixel_size_x = resize_dem(cropped_dem, (64, 64), 1)
+    else:
+        if prev_cx is not None and prev_cy is not None and prev_global_cx is not None and prev_global_cy is not None:
+            return np.zeros((64, 64), dtype=np.uint8), prev_cx, prev_cy, prev_global_cx, prev_global_cy
+        else:
+            # If there are no previous values, return zeros
+            return np.zeros((64, 64), dtype=np.uint8), 0, 0, 0, 0
+        
     # Calculate slope using NumPy gradient
     dzdx, dzdy = np.gradient(resized_dem, pixel_size_x)
     slope_rad = np.arctan(np.sqrt(dzdx**2 + dzdy**2))
@@ -124,7 +132,7 @@ def TerrainProcess(fovX, fovY, size):
         cy = int(M['m01'] / M['m00'])
 
         # reduce size
-        safety_map_processed = np.uint8((safety_map_processed - safety_map_processed.min()) / (safety_map_processed.max() - safety_map_processed.min()) * 255)
+        safety_map_processed = np.uint8((safety_map_processed  / safety_map_processed.max()) * 255)
 
         # Calculate global centroid
         global_cx = int(fovX + cx * pixel_size_x)

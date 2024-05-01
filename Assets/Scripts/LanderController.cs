@@ -18,33 +18,13 @@ public class LanderController : MonoBehaviour {
 
     private bool thrusterOn;
 
-    /*
-    private bool rcs0up;
-    private bool rcs0down;
-    private bool rcs0pitch;
-    private bool rcs0yaw;
-
-    private bool rcs1up;
-    private bool rcs1down;
-    private bool rcs1pitch;
-    private bool rcs1yaw;
-
-    private bool rcs2up;
-    private bool rcs2down;
-    private bool rcs3pitch;
-    private bool rcs3yaw;
-
-    private bool rcs4up;
-    private bool rcs4down;
-    private bool rcs4pitch;
-    private bool rcs4yaw;
-    */
-
     private bool rcsPitchPosOn;
     private bool rcsPitchNegOn;
     private bool rcsYawPosOn;
     private bool rcsYawNegOn;
-    private int[] centroidData;
+
+    [SerializeField] private float targetX;
+    [SerializeField] private float targetY;
 
 
     // Start is called before the first frame update
@@ -54,33 +34,12 @@ public class LanderController : MonoBehaviour {
         udpSocket = GetComponent<UdpSocket>();
 
         thrusterOn = false;
-
-        /*
-        rcs0up = false;
-        rcs0down = false;
-        rcs0pitch = false;
-        rcs0yaw = false;
-
-        rcs1up = false;
-        rcs1down = false;
-        rcs1pitch = false;
-        rcs1yaw = false;
-
-        rcs2up = false;
-        rcs2down = false;
-        rcs3pitch = false;
-        rcs3yaw = false;
-
-        rcs4up = false;
-        rcs4down = false;
-        rcs4pitch = false;
-        rcs4yaw = false;
-        */
-
         rcsPitchPosOn = false;
         rcsPitchNegOn = false;
         rcsYawPosOn = false;
         rcsYawNegOn = false;
+        targetX = 100f;
+        targetY = 100f;
     }
 
     // Method to update the texture on the UI element (RawImage) using the received safety map data
@@ -137,39 +96,69 @@ public class LanderController : MonoBehaviour {
             Debug.Log("Escaped");
             agentController.EndEpisode(-1f);
         }
+        // Out of bounds reset
+        if (position.y == -1f) {
+            Debug.Log("Escaped");
+            agentController.EndEpisode(0f);
+        }
 
-        SendPosition(position.x, position.y, position.z);
+        SendPosition(position.x+1000f, position.y, position.z+1000f);
 
         int[] safetyMapData = udpSocket.GetSafetyMapData();
-        centroidData = udpSocket.GetCentroidData();
+        int[] centroid = udpSocket.GetCentroidData();
+
+        if(position.y > 200f) {
+            targetX = centroid[0];
+            targetY = centroid[1];
+        }
+        
 
         if (safetyMapData != null) {
             // Update texture
-            UpdateSafetyMapTexture(safetyMapData, centroidData[0], centroidData[1]);
+            UpdateSafetyMapTexture(safetyMapData, (int)targetX, (int)targetY);
         }
 
-        if (centroidData != null) {
+        if (centroid != null) {
             // Print centroid data
             //Debug.Log("Centroid Data: cx = " + centroidData[0] + ", cy = " + centroidData[1] + ", global_cx = " + centroidData[2] + ", global_cy = " + centroidData[3]);
         }
 
         //REWARDS
-        //velocity tracking reward
+        //vertical velocity tracking reward
         float referenceVelocity = ReferenceVelocity(position.y);
-        agentController.AddReward(VelocityReward(velocity.y, referenceVelocity));
-        
+        if (velocity.y > -0.2f)
+            agentController.AddReward(-10f);
+        else
+            agentController.AddReward(VerticalVelocityReward(velocity.y, referenceVelocity));
+
+        //horizontal velocity tracking reward
+        //float horizontalReferenceVelocityX = HorizontalReferenceVelocity(position.x, targetX);
+        //agentController.AddReward(2f*HorizontalVelocityReward(velocity.x, horizontalReferenceVelocityX));
+        //float horizontalReferenceVelocityY = HorizontalReferenceVelocity(position.z, targetY);
+        //agentController.AddReward(2f*HorizontalVelocityReward(velocity.z, horizontalReferenceVelocityY));
+        agentController.AddReward(AlternateHorizontalDeviationReward(position.x, targetX));
+        agentController.AddReward(AlternateHorizontalDeviationReward(position.z, targetY));
+
 
         //attitude tracking reward
-        agentController.AddReward(AttitudeReward(Mathf.Abs(rotation.x)));
-        agentController.AddReward(AttitudeReward(Mathf.Abs(rotation.z)));
+        if (position.y > 2f) {
+            agentController.AddReward(AttitudeReward(Mathf.Abs(rotation.x)));
+            agentController.AddReward(AttitudeReward(Mathf.Abs(rotation.z)));
+        }
+        else {
+            agentController.AddReward(Mathf.Min(0f, AttitudeReward(Mathf.Abs(rotation.x))));
+            agentController.AddReward(Mathf.Min(0f, AttitudeReward(Mathf.Abs(rotation.z))));
+        }
+
 
         //target tracking reward
-        agentController.AddReward(TargetReward(position));
+        //agentController.AddReward(TargetReward(position));
 
         // Safe landing check
-        if (landerRigidbody.IsSleeping()) {
+        if (landerRigidbody.IsSleeping() && position.y < 1f) {
             if (Mathf.Abs(rotation.x) < 20f && Mathf.Abs(rotation.z) < 20f) {
-                if (Vector3.Distance(GetPosition(), new Vector3(centroidData[2], 0f, centroidData[3])) > 5f) {
+                // add in target tracking later
+                if (safetyMapData[(int)(0.015625f * position.x)] != 255 || safetyMapData[(int)(0.015625f * position.z)] != 255) {
                     agentController.EndEpisode(0f);
                     Debug.Log("Too far from spot");
                 }
@@ -180,56 +169,69 @@ public class LanderController : MonoBehaviour {
             }
             else {
                 agentController.EndEpisode(0f);
-
                 Debug.Log("Tipped over");
             }
         }
 
-        //Debug.Log("Position X: " + position.x + " Y : " + position.y + " Z : " + position.z); //+
-        //    "\nVelocity X: " + velocity.x + " Y : " + velocity.y + " Z : " + velocity.z +
-        //    "\nRotation X: " + rotation.x + " Y : " + rotation.y + " Z : " + rotation.z);
-        //   "Angular Velocity X: " + angularVelocity.x + " Y : " + angularVelocity.y + " Z : " + angularVelocity.z);
-
+        /*
+        Debug.Log("Position X: " + position.x + " Y : " + position.y + " Z : " + position.z +
+            "\nVelocity X: " + velocity.x + " Y : " + velocity.y + " Z : " + velocity.z +
+            "\nRotation X: " + rotation.x + " Y : " + rotation.y + " Z : " + rotation.z);
+        */
+        /*
+        Debug.Log("Position X: " + position.x + " Y : " + position.y + " Z : " + position.z +
+            "\nVelocity X: " + velocity.x + " Y : " + velocity.y + " Z : " + velocity.z +
+            "\nTarget X: " + targetX + " Z : " + targetY +
+            "\ndeviation X: " + (position.x - targetX) + " Z : " + (position.z - targetY));
+        */
         //Actuator calls
-        if (position.y > 2f) {
+        if (position.y > 1f) {
             MainThrusterControl();
             RCSThrusterControl();
         }
     }
 
     private float AttitudeReward(float tilt) {
-        float result = (float)(-1 * Mathf.Abs((float)System.Math.Tanh(0.05 * tilt)) + 0.5);
+        float result = -2f * Mathf.Abs((float)System.Math.Tanh(0.1f * tilt)) + 1f;
         return result;
     }
     private float ReferenceVelocity(float altitude) {
-        return -3 * Mathf.Exp(altitude / 300) + 1;
-    }
-
-    private float VelocityReward(float velocity, float referenceVelocity) {
-        float innerExpression = referenceVelocity - velocity;
-        float result = -2 * Mathf.Abs((float)System.Math.Tanh(0.5 * innerExpression)) + 1;
+        float result;
+        if (altitude > 200f)
+            result = -30 * (float)System.Math.Tanh(0.002f * altitude);
+        else
+            result = -20 * Mathf.Exp(0.01f * altitude - 2f) + 2f;
         return result;
     }
 
-    private float TargetReward(Vector3 position) {
-        float distance = Vector3.Distance(position, new Vector3(centroidData[2], position.y, centroidData[3]));
-        float result;
-        if (distance > 800)
-            result = -1f;
-        else if (distance > 400f)
-            result = -0.5f;
-        else if (distance > 100f)
-            result = -0.2f;
-        else if (distance > 50f)
-            result = 0.4f;
-        else if (distance < 25f)
-            result = 0.6f;
-        else if (distance < 10f)
-            result = 0.7f;
-        else if (distance < 5f)
-            result = 0.9f;
-        else 
-            result = 1f;
+    private float VerticalVelocityReward(float velocity, float referenceVelocity) {
+        float deviation = referenceVelocity - velocity;
+        float result = -2f * Mathf.Abs((float)System.Math.Tanh(0.1f * deviation)) + 1f;
+        return result;
+    }
+
+    //Target tracking reward function
+    private float HorizontalReferenceVelocity(float position, float target) {
+        float deviation = position - target;
+        float result = -50f * (float)System.Math.Tanh(0.002f * deviation);
+        return result;
+    }
+
+    private float HorizontalVelocityReward(float velocity, float referenceVelocity) {
+        float deviation = referenceVelocity - velocity;
+        float result = -2f * Mathf.Abs((float)System.Math.Tanh(0.5f * deviation)) + 1f;
+        return result;
+    }
+
+    private float HorizontalDeviationReward(float position, float target) {
+        float deviation = position - target;
+        float result = -2f * Mathf.Abs((float)System.Math.Tanh(0.5f * deviation)) + 1f;
+        return result;
+    }
+
+    private float AlternateHorizontalDeviationReward(float position, float target) {
+        float deviation = position - target;
+        float result = -2f * Mathf.Abs((float)System.Math.Tanh(0.02f * deviation)) + 2f - Mathf.Exp(Mathf.Abs(0.0025f * deviation)) + Mathf.Max(0f, 3f - 0.12f * Mathf.Abs(deviation));
         return result;
     }
     private void DrawEngineRays(Vector3 worldForce, Vector3 worldPointApplication, float scale) {
@@ -237,11 +239,19 @@ public class LanderController : MonoBehaviour {
     }
 
     public void ResetPosition() {
-        float velocity = 5f;
-        transform.localPosition = new Vector3(1025f + Random.Range(-400f, 400f), Random.Range(800f, 1000f), 1025f + Random.Range(-400f, 400f));
-        transform.localEulerAngles = new Vector3(Random.Range(-5f, 5f), 0f, Random.Range(-5f, 5f));
-        landerRigidbody.velocity = new Vector3(Random.Range(-velocity, velocity), Random.Range(-20f, 0f), Random.Range(-velocity, velocity));
+        float centerPosition = 100f;
+        float randomPosition = 20f;
+        float randomAngle = 5f;
+        float velocity = 0f;
+        float randomVerticalVelocity = 15f;
+        float randomPositionTarget = 5f;
+
+        transform.localPosition = new Vector3(centerPosition + Random.Range(-randomPosition, randomPosition), Random.Range(500f, 520f), centerPosition + Random.Range(-randomPosition, randomPosition));
+        transform.localEulerAngles = new Vector3(Random.Range(-randomAngle, randomAngle), 0f, Random.Range(-randomAngle, randomAngle));
+        landerRigidbody.velocity = new Vector3(Random.Range(-velocity, velocity), Random.Range(-1f, 0f), Random.Range(-velocity, velocity));
         landerRigidbody.angularVelocity = new Vector3(0, 0, 0);
+        targetX = transform.localPosition.x + Random.Range(-randomPositionTarget, randomPositionTarget);
+        targetY = transform.localPosition.z + Random.Range(-randomPositionTarget, randomPositionTarget);
     }
 
     private void SendPosition(float posX, float posY, float posZ) {
@@ -264,7 +274,7 @@ public class LanderController : MonoBehaviour {
     }
 
     public Vector2 GetTarget() {
-        Vector2 target = new Vector2(centroidData[2], centroidData[3]);
+        Vector2 target = new Vector2(targetX, targetY);
         return target;
     }
 

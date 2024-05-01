@@ -190,6 +190,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   safetyMapImage: {fileID: 0}
+  targetX: 0
+  targetY: 0
 --- !u!114 &7973656436785811709
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -235,7 +237,7 @@ MonoBehaviour:
   agentParameters:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
-  MaxStep: 2000
+  MaxStep: 6000
 --- !u!114 &6469267973812731072
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -8,8 +8,6 @@ using Unity.MLAgents.Actuators;
 public class AgentController : Agent {
 
     private LanderController landerController;
-    //[SerializeField] private float targetX;
-    //[SerializeField] private float targetZ;
 
     // Start is called before the first frame update
     void Start()
@@ -31,13 +29,20 @@ public class AgentController : Agent {
         float rollIndicator = rocketRotation.y;
         float yawIndicator = rocketRotation.z;
 
+        //lander position
         sensor.AddObservation(rocketPosition.x);
         sensor.AddObservation(rocketPosition.y);
         sensor.AddObservation(rocketPosition.z);
 
-        sensor.AddObservation(targetPosition.x);
-        sensor.AddObservation(targetPosition.y);
+        //target position
+        //sensor.AddObservation(targetPosition.x);
+        //sensor.AddObservation(targetPosition.y);
 
+        //target deviation
+        sensor.AddObservation(rocketPosition.x - targetPosition.x);
+        sensor.AddObservation(rocketPosition.z - targetPosition.y);
+
+        //lander velocity
         sensor.AddObservation(rocketVelocity.x);
         sensor.AddObservation(rocketVelocity.y);
         sensor.AddObservation(rocketVelocity.z);
@@ -54,10 +59,14 @@ public class AgentController : Agent {
     public override void OnActionReceived(ActionBuffers actions) {
         landerController.SetThrusterState(actions.DiscreteActions[0]);
         landerController.SetSimpleRCSThrusterState(actions.DiscreteActions[1], actions.DiscreteActions[2]);
-        AddReward(-1f / MaxStep);
+        AddReward(-2f / MaxStep);
     }
 
     public void EndEpisode(float reward) {
+        Vector2 targetPosition = landerController.GetTarget();
+        Vector3 position = landerController.GetPosition();
+        float deviation = Vector2.Distance(targetPosition, new Vector2(position.x, position.z));
+        Academy.Instance.StatsRecorder.Add("Performance/Target Deviation", deviation);
         AddReward(reward);
         EndEpisode();
     }

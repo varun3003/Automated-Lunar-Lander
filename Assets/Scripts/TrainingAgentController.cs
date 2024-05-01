@@ -31,13 +31,20 @@ public class TrainingAgentController : Agent {
         float rollIndicator = rocketRotation.y;
         float yawIndicator = rocketRotation.z;
 
-        sensor.AddObservation(rocketPosition.x);
-        sensor.AddObservation(rocketPosition.y);
-        sensor.AddObservation(rocketPosition.z);
+        //lander position
+        //sensor.AddObservation(rocketPosition.x);
+        sensor.AddObservation(rocketPosition.y); //altutude
+        //sensor.AddObservation(rocketPosition.z);
 
-        sensor.AddObservation(targetPosition.x);
-        sensor.AddObservation(targetPosition.y);
+        //target position
+        //sensor.AddObservation(targetPosition.x);
+        //sensor.AddObservation(targetPosition.y);
 
+        //target deviation
+        sensor.AddObservation(rocketPosition.x - targetPosition.x); //x-axis
+        sensor.AddObservation(rocketPosition.z - targetPosition.y); //z-axis
+
+        //lander velocity
         sensor.AddObservation(rocketVelocity.x);
         sensor.AddObservation(rocketVelocity.y);
         sensor.AddObservation(rocketVelocity.z);
