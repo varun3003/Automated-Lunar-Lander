@@ -189,9 +189,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 02547231e754db44fad60bd25ea3b090, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  winMaterial: {fileID: 0}
-  loseMaterial: {fileID: 0}
-  landingSiteRenderer: {fileID: 0}
+  safetyMapImage: {fileID: 0}
+  targetX: 0
+  targetY: 0
 --- !u!114 &7973656436785811709
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -209,8 +209,8 @@ MonoBehaviour:
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 0
-      BranchSizes: 02000000
-    VectorActionSize: 02000000
+      BranchSizes: 020000000300000003000000
+    VectorActionSize: 020000000300000003000000
     VectorActionDescriptions: []
     VectorActionSpaceType: 0
     hasUpgradedBrainParametersWithActionSpec: 1
@@ -237,7 +237,7 @@ MonoBehaviour:
   agentParameters:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
-  MaxStep: 2000
+  MaxStep: 6000
 --- !u!114 &6469267973812731072
 MonoBehaviour:
   m_ObjectHideFlags: 0

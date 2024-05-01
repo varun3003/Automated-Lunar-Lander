@@ -1,0 +1,56 @@
+{
+    "LunarLander": {
+        "checkpoints": [
+            {
+                "steps": 499940,
+                "file_path": "results\\phase1b2\\LunarLander\\LunarLander-499940.onnx",
+                "reward": 4767.771981954575,
+                "creation_time": 1712166638.2012534,
+                "auxillary_file_paths": [
+                    "results\\phase1b2\\LunarLander\\LunarLander-499940.pt"
+                ]
+            },
+            {
+                "steps": 999989,
+                "file_path": "results\\phase1b2\\LunarLander\\LunarLander-999989.onnx",
+                "reward": 2787.8016624450684,
+                "creation_time": 1712167323.2195969,
+                "auxillary_file_paths": [
+                    "results\\phase1b2\\LunarLander\\LunarLander-999989.pt"
+                ]
+            },
+            {
+                "steps": 1499951,
+                "file_path": "results\\phase1b2\\LunarLander\\LunarLander-1499951.onnx",
+                "reward": 4911.256423711777,
+                "creation_time": 1712168012.1621046,
+                "auxillary_file_paths": [
+                    "results\\phase1b2\\LunarLander\\LunarLander-1499951.pt"
+                ]
+            },
+            {
+                "steps": 1792753,
+                "file_path": "results\\phase1b2\\LunarLander\\LunarLander-1792753.onnx",
+                "reward": 3658.431343714396,
+                "creation_time": 1712168420.1137567,
+                "auxillary_file_paths": [
+                    "results\\phase1b2\\LunarLander\\LunarLander-1792753.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 1792753,
+            "file_path": "results\\phase1b2\\LunarLander.onnx",
+            "reward": 3658.431343714396,
+            "creation_time": 1712168420.1137567,
+            "auxillary_file_paths": [
+                "results\\phase1b2\\LunarLander\\LunarLander-1792753.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "0.30.0",
+        "torch_version": "2.0.1+cu117"
+    }
+}

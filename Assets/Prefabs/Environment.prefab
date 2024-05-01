@@ -6842,9 +6842,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 02547231e754db44fad60bd25ea3b090, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  winMaterial: {fileID: 2100000, guid: 465f6b232b586014e9a7723f2867a5b9, type: 2}
-  loseMaterial: {fileID: 2100000, guid: a7566b9078ce7604ba550b7471189a04, type: 2}
-  landingSiteRenderer: {fileID: 8521532560301731479}
+  safetyMapImage: {fileID: 0}
 --- !u!114 &1881604886677192854
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6858,7 +6856,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 10
+    VectorObservationSize: 12
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 0
@@ -6867,7 +6865,7 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 0
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: 7b0ce433e7b5bab4db9800953f01a91f, type: 3}
+  m_Model: {fileID: 0}
   m_InferenceDevice: 1
   m_BehaviorType: 2
   m_BehaviorName: LunarLander
