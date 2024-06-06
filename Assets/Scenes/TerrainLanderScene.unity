@@ -602,10 +602,26 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1090790830280626766, guid: 1155ba958b2631941a0f1d798b3cc30c,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1090790830280626766, guid: 1155ba958b2631941a0f1d798b3cc30c,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1709243933576598442, guid: 1155ba958b2631941a0f1d798b3cc30c,
+        type: 3}
+      propertyPath: m_Model
+      value: 
+      objectReference: {fileID: 5022602860645237092, guid: 849ed56035b167b4d86da471a765c992,
+        type: 3}
     - target: {fileID: 1709243933576598442, guid: 1155ba958b2631941a0f1d798b3cc30c,
         type: 3}
       propertyPath: m_BrainParameters.VectorObservationSize
-      value: 12
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 1817160172802452500, guid: 1155ba958b2631941a0f1d798b3cc30c,
         type: 3}
@@ -666,6 +682,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: TerrainEnvironment
+      objectReference: {fileID: 0}
+    - target: {fileID: 4022968001767973853, guid: 1155ba958b2631941a0f1d798b3cc30c,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4022968001767973853, guid: 1155ba958b2631941a0f1d798b3cc30c,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7679858155170268852, guid: 1155ba958b2631941a0f1d798b3cc30c,
         type: 3}

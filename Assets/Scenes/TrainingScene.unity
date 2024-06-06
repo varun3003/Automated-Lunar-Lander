@@ -798,6 +798,12 @@ PrefabInstance:
       propertyPath: m_Name
       value: TrainingEnvironment (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 4310922257096489817, guid: baddd5aad9c7e2b42981d8522f8a7e56,
+        type: 3}
+      propertyPath: m_Model
+      value: 
+      objectReference: {fileID: 5022602860645237092, guid: 849ed56035b167b4d86da471a765c992,
+        type: 3}
     - target: {fileID: 7128236393095157329, guid: baddd5aad9c7e2b42981d8522f8a7e56,
         type: 3}
       propertyPath: m_LocalPosition.x

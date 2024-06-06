@@ -200,7 +200,7 @@ public class TrainingLanderController : MonoBehaviour {
 
     public void ResetPosition() {
         float centerPosition = 500f;
-        float randomPosition = 600f;
+        float randomPosition = 500f;
         float randomAngle = 5f;
         float velocity = 0f;
         float randomVerticalVelocity = 0f;
@@ -320,7 +320,7 @@ public class TrainingLanderController : MonoBehaviour {
             landerRigidbody.AddForceAtPosition(worldForce, worldPoint, ForceMode.Force);
             DrawEngineRays(worldForce, worldPoint, 10);
 
-            agentController.AddReward(-0.03f);
+            agentController.AddReward(-0.3f);
         }
     }
 
@@ -374,7 +374,7 @@ public class TrainingLanderController : MonoBehaviour {
             DrawEngineRays(worldForce, worldPoint2, 5);
         }
 
-        agentController.AddReward(-0.003f);
+        agentController.AddReward(-0.03f);
     }
 
     void OnCollisionEnter(Collision collision) {

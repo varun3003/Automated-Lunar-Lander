@@ -18,6 +18,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from rasterio.windows import Window
 from scipy.ndimage import generic_filter, median_filter, minimum_filter #, maximum_filter
+from skimage.morphology import skeletonize
 import cv2
 
 # Create UDP socket to use for sending (and receiving)
@@ -25,12 +26,12 @@ sock = U.UdpComms(udpIP="127.0.0.1", portTX=8000, portRX=8001, enableRX=True, su
 
 # load dataset
 # Load the DEM array
-input_dem_path = 'DEMS/dem1.tif'
+input_dem_path = 'DEMS/dem.tif'
 with rasterio.open(input_dem_path) as src:
     dem_array = src.read(1)  # Read the first band
 
 def getFOV(posx, posy, posz):
-    width = posy * math.tan(math.pi/12)
+    width = max(32, posy * math.tan(math.pi/12))
     fovX = int(posx - width)
     fovZ = int(posz - width)
     size = max(1,int(width * 2))
@@ -134,13 +135,32 @@ def TerrainProcess(fovX, fovY, size):
         # reduce size
         safety_map_processed = np.uint8((safety_map_processed  / safety_map_processed.max()) * 255)
 
-        # Calculate global centroid
+    
+        # image = safety_map_processed[:]
+
+        # # Step 2: Make the rest of the image black
+        # mask = np.zeros_like(image)
+        # cv2.drawContours(mask, [largest_contour], 0, 255, -1)
+        # image[mask == 0] = 0
+
+        # # Step 3: Skeletonize the resulting image
+        # skeleton = skeletonize(image / 255)  # Convert to binary (0 and 1)
+
+        # # Step 4: Identify the white pixel positions and return one at random
+        # white_pixels = np.argwhere(skeleton == 1)
+        # random_white_pixel = tuple(white_pixels[np.random.choice(len(white_pixels))])
+        # distance = 200
+        # for white_pixel in white_pixels:
+        #     if pow(31-white_pixel[0],2 ) + pow(31-white_pixel[1],2 ) < distance:
+        #         distance = pow(31-white_pixel[0],2 ) + pow(31-white_pixel[1],2 )
+        #         random_white_pixel = white_pixel
+
+        # cx = random_white_pixel[1]
+        # cy = random_white_pixel[0]
+
+        # Calculate global value
         global_cx = int(fovX + cx * pixel_size_x)
         global_cy = int(fovY + cy * pixel_size_x)
-
-        # Print the centroid coordinates
-        #print("Centroid coordinates (x, y):", (cx, cy, pixel_size_x))
-        #print("Global Centroid coordinates (x, y):", (global_cx, global_cy))
 
         # Update previous values
         prev_cx = cx

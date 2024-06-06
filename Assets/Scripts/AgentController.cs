@@ -30,17 +30,17 @@ public class AgentController : Agent {
         float yawIndicator = rocketRotation.z;
 
         //lander position
-        sensor.AddObservation(rocketPosition.x);
-        sensor.AddObservation(rocketPosition.y);
-        sensor.AddObservation(rocketPosition.z);
+        //sensor.AddObservation(rocketPosition.x);
+        sensor.AddObservation(rocketPosition.y); //altutude
+        //sensor.AddObservation(rocketPosition.z);
 
         //target position
         //sensor.AddObservation(targetPosition.x);
         //sensor.AddObservation(targetPosition.y);
 
         //target deviation
-        sensor.AddObservation(rocketPosition.x - targetPosition.x);
-        sensor.AddObservation(rocketPosition.z - targetPosition.y);
+        sensor.AddObservation((rocketPosition.x - targetPosition.x) * 0.08f); //x-axis
+        sensor.AddObservation((rocketPosition.z - targetPosition.y) * 0.08f); //z-axis
 
         //lander velocity
         sensor.AddObservation(rocketVelocity.x);
