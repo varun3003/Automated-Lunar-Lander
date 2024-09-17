@@ -1,0 +1,56 @@
+{
+    "LunarLander": {
+        "checkpoints": [
+            {
+                "steps": 1499990,
+                "file_path": "results\\updateresults2h\\LunarLander\\LunarLander-1499990.onnx",
+                "reward": 988.6528621128825,
+                "creation_time": 1718980145.3893137,
+                "auxillary_file_paths": [
+                    "results\\updateresults2h\\LunarLander\\LunarLander-1499990.pt"
+                ]
+            },
+            {
+                "steps": 1999983,
+                "file_path": "results\\updateresults2h\\LunarLander\\LunarLander-1999983.onnx",
+                "reward": 1654.3554756153123,
+                "creation_time": 1718980744.8956225,
+                "auxillary_file_paths": [
+                    "results\\updateresults2h\\LunarLander\\LunarLander-1999983.pt"
+                ]
+            },
+            {
+                "steps": 2499954,
+                "file_path": "results\\updateresults2h\\LunarLander\\LunarLander-2499954.onnx",
+                "reward": 2098.824724033877,
+                "creation_time": 1718981341.0711753,
+                "auxillary_file_paths": [
+                    "results\\updateresults2h\\LunarLander\\LunarLander-2499954.pt"
+                ]
+            },
+            {
+                "steps": 2999997,
+                "file_path": "results\\updateresults2h\\LunarLander\\LunarLander-2999997.onnx",
+                "reward": 2253.030557782664,
+                "creation_time": 1718981946.20668,
+                "auxillary_file_paths": [
+                    "results\\updateresults2h\\LunarLander\\LunarLander-2999997.pt"
+                ]
+            },
+            {
+                "steps": 3499951,
+                "file_path": "results\\updateresults2h\\LunarLander\\LunarLander-3499951.onnx",
+                "reward": 2557.8489036284336,
+                "creation_time": 1718982545.3970008,
+                "auxillary_file_paths": [
+                    "results\\updateresults2h\\LunarLander\\LunarLander-3499951.pt"
+                ]
+            }
+        ]
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "0.30.0",
+        "torch_version": "2.0.1+cu117"
+    }
+}

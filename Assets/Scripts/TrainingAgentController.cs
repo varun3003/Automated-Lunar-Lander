@@ -8,8 +8,6 @@ using Unity.MLAgents.Actuators;
 public class TrainingAgentController : Agent {
 
     private TrainingLanderController landerController;
-    //[SerializeField] private float targetX;
-    //[SerializeField] private float targetZ;
 
     // Start is called before the first frame update
     void Start()
@@ -25,20 +23,18 @@ public class TrainingAgentController : Agent {
         Vector2 targetPosition = landerController.GetTarget();
         Vector3 rocketPosition = landerController.GetPosition();
         Vector3 rocketVelocity = landerController.GetVelocity();
-        Vector3 rocketAngularVelocity = landerController.GetAngularVelocity();
+        //sVector3 rocketAngularVelocity = landerController.GetAngularVelocity();
         Vector3 rocketRotation = landerController.GetRotation();
         float pitchIndicator = rocketRotation.x;
-        float rollIndicator = rocketRotation.y;
+        //float rollIndicator = rocketRotation.y;
         float yawIndicator = rocketRotation.z;
+        //float landerMass = landerController.GetMass();
+
+        //lander mass
+        //sensor.AddObservation(landerMass);
 
         //lander position
-        //sensor.AddObservation(rocketPosition.x);
         sensor.AddObservation(rocketPosition.y); //altutude
-        //sensor.AddObservation(rocketPosition.z);
-
-        //target position
-        //sensor.AddObservation(targetPosition.x);
-        //sensor.AddObservation(targetPosition.y);
 
         //target deviation
         sensor.AddObservation(rocketPosition.x - targetPosition.x); //x-axis
@@ -53,22 +49,28 @@ public class TrainingAgentController : Agent {
         sensor.AddObservation(pitchIndicator);
         sensor.AddObservation(yawIndicator);
 
-        sensor.AddObservation(rocketAngularVelocity.x);
+        //sensor.AddObservation(rocketAngularVelocity.x);
         //sensor.AddObservation(rocketAngularVelocity.y);
-        sensor.AddObservation(rocketAngularVelocity.z);
+        //sensor.AddObservation(rocketAngularVelocity.z);
     }
 
     public override void OnActionReceived(ActionBuffers actions) {
         landerController.SetThrusterState(actions.DiscreteActions[0]);
         landerController.SetSimpleRCSThrusterState(actions.DiscreteActions[1], actions.DiscreteActions[2]);
-        AddReward(-2f/MaxStep);
     }
 
     public void EndEpisode(float reward) {
         Vector2 targetPosition = landerController.GetTarget();
         Vector3 position = landerController.GetPosition();
+        float fuelMass = landerController.GetFuelMass();
+        float velocityDeviation = landerController.GetVelocityDeviation();
+        float tiltDeviation = landerController.GetTiltDeviation();
+
         float deviation = Vector2.Distance(targetPosition, new Vector2(position.x, position.z));
         Academy.Instance.StatsRecorder.Add("Performance/Target Deviation", deviation);
+        Academy.Instance.StatsRecorder.Add("Performance/Velocity Deviation", velocityDeviation);
+        Academy.Instance.StatsRecorder.Add("Performance/Tilt Deviation", tiltDeviation);
+        Academy.Instance.StatsRecorder.Add("Performance/Remaining Fuel Mass", fuelMass);
         AddReward(reward);
         EndEpisode();
     }
